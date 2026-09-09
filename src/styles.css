@@ -62,6 +62,11 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-signal: var(--signal);
+  --color-engine-flash: var(--engine-flash);
+  --color-engine-pro: var(--engine-pro);
+  --color-engine-expert: var(--engine-expert);
+  --color-engine-deep: var(--engine-deep);
+  --color-engine-journal: var(--engine-journal);
 }
 
 :root {
@@ -87,6 +92,11 @@
   --input: oklch(0.84 0.015 95);
   --ring: var(--user-accent);
   --signal: oklch(0.73 0.15 67);
+  --engine-flash: oklch(0.72 0.16 76);
+  --engine-pro: oklch(0.58 0.14 190);
+  --engine-expert: oklch(0.57 0.17 325);
+  --engine-deep: oklch(0.48 0.12 250);
+  --engine-journal: oklch(0.55 0.13 145);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -123,6 +133,11 @@
   --input: oklch(0.4 0.02 235);
   --ring: var(--user-accent);
   --signal: oklch(0.76 0.15 70);
+  --engine-flash: oklch(0.74 0.16 76);
+  --engine-pro: oklch(0.66 0.14 190);
+  --engine-expert: oklch(0.65 0.16 325);
+  --engine-deep: oklch(0.62 0.13 250);
+  --engine-journal: oklch(0.65 0.14 145);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);

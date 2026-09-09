@@ -1,13 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   Archive,
+  Bot,
   BookMarked,
   BookOpenText,
+  BrainCircuit,
+  Check,
   ChevronLeft,
   ChevronRight,
   CircleUserRound,
   FileSearch,
   FolderKanban,
+  Gauge,
+  GraduationCap,
   History,
   Library,
   Menu,
@@ -52,6 +57,57 @@ export const Route = createFileRoute("/")({
 });
 
 type Theme = "light" | "dark";
+type EngineMode = "flash" | "pro" | "expert" | "deep" | "journal";
+
+const engineModes = [
+  {
+    id: "flash",
+    label: "Gemini Flash",
+    shortLabel: "Flash",
+    description: "Fast response mode",
+    icon: Gauge,
+    tone: "bg-engine-flash",
+  },
+  {
+    id: "pro",
+    label: "Gemini Pro",
+    shortLabel: "Pro",
+    description: "Standard analytical mode",
+    icon: BrainCircuit,
+    tone: "bg-engine-pro",
+  },
+  {
+    id: "expert",
+    label: "Gemini Expert",
+    shortLabel: "Expert",
+    description: "Deep synthesis mode",
+    icon: Sparkles,
+    tone: "bg-engine-expert",
+  },
+  {
+    id: "deep",
+    label: "Deep Research",
+    shortLabel: "Deep",
+    description: "Multi-agent web & paper search",
+    icon: Bot,
+    tone: "bg-engine-deep",
+  },
+  {
+    id: "journal",
+    label: "Journal Focus",
+    shortLabel: "Journals",
+    description: "Indexed academic papers only",
+    icon: GraduationCap,
+    tone: "bg-engine-journal",
+  },
+] satisfies Array<{
+  id: EngineMode;
+  label: string;
+  shortLabel: string;
+  description: string;
+  icon: typeof Gauge;
+  tone: string;
+}>;
 
 const recentSessions = [
   { title: "Neural plasticity after stroke", time: "12 min" },
@@ -70,6 +126,8 @@ function ResearchWorkspace() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [appearanceOpen, setAppearanceOpen] = useState(false);
+  const [engineOpen, setEngineOpen] = useState(false);
+  const [engineMode, setEngineMode] = useState<EngineMode>("flash");
   const [theme, setTheme] = useState<Theme>("light");
   const [accent, setAccent] = useState("#177E76");
   const [draftAccent, setDraftAccent] = useState("#177E76");
@@ -100,6 +158,8 @@ function ResearchWorkspace() {
 
   const statuses = ["Scraping papers…", "Generating citations…", "Synthesizing PDF…"];
   const validAccent = /^#[0-9A-Fa-f]{6}$/.test(draftAccent);
+  const activeEngine = engineModes.find((mode) => mode.id === engineMode) ?? engineModes[0];
+  const ActiveEngineIcon = activeEngine.icon;
 
   const applyAccent = () => {
     if (validAccent) setAccent(draftAccent.toUpperCase());
@@ -217,15 +277,75 @@ function ResearchWorkspace() {
             </div>
 
             <div className="relative flex shrink-0 items-center gap-2">
-              <div className="hidden items-center gap-1 rounded-full border border-border bg-muted/60 p-1 sm:flex" aria-label="Workspace navigation">
-                <Button variant="ghost" size="sm" className="rounded-full bg-background px-4 shadow-sm">Canvas</Button>
-                <Button variant="ghost" size="sm" className="rounded-full px-4 text-muted-foreground">Library</Button>
+              <div className="relative">
+                <Button
+                  variant="outline"
+                  className="h-10 rounded-full bg-background px-2.5 shadow-none sm:px-3"
+                  onClick={() => {
+                    setEngineOpen((value) => !value);
+                    setAppearanceOpen(false);
+                  }}
+                  aria-label={`AI engine: ${activeEngine.label}`}
+                  aria-expanded={engineOpen}
+                >
+                  <span className={cn("grid size-6 place-items-center rounded-full text-primary-foreground", activeEngine.tone)}>
+                    <ActiveEngineIcon className="size-3.5" />
+                  </span>
+                  <span className="hidden max-w-32 truncate text-xs sm:inline">{activeEngine.label}</span>
+                  <span className="text-xs sm:hidden">{activeEngine.shortLabel}</span>
+                  <ChevronRight className={cn("size-3.5 transition-transform", engineOpen && "rotate-90")} />
+                </Button>
+
+                {engineOpen && (
+                  <div className="engine-panel absolute right-0 top-12 w-[min(22rem,calc(100vw-2rem))] rounded-lg border border-border bg-popover p-2 text-popover-foreground shadow-xl">
+                    <div className="px-3 pb-2 pt-1">
+                      <p className="font-display text-sm font-semibold">AI engine control</p>
+                      <p className="text-[11px] text-muted-foreground">Choose how Orbis approaches this session</p>
+                    </div>
+                    <div className="space-y-1" role="listbox" aria-label="AI engine mode">
+                      {engineModes.map((mode) => {
+                        const ModeIcon = mode.icon;
+                        const selected = mode.id === engineMode;
+                        return (
+                          <button
+                            key={mode.id}
+                            type="button"
+                            role="option"
+                            aria-selected={selected}
+                            onClick={() => {
+                              setEngineMode(mode.id);
+                              setEngineOpen(false);
+                            }}
+                            className={cn(
+                              "grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-md px-3 py-2.5 text-left transition-colors",
+                              selected ? "bg-accent text-accent-foreground" : "hover:bg-muted",
+                            )}
+                          >
+                            <span className={cn("grid size-9 shrink-0 place-items-center rounded-full text-primary-foreground", mode.tone)}>
+                              <ModeIcon className="size-4" />
+                            </span>
+                            <span className="min-w-0">
+                              <span className="block truncate text-sm font-semibold">{mode.label}</span>
+                              <span className="block truncate text-[11px] text-muted-foreground">{mode.description}</span>
+                            </span>
+                            <span className={cn("grid size-5 place-items-center rounded-full", selected ? "bg-primary text-primary-foreground" : "text-transparent")}>
+                              <Check className="size-3" />
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
               <Button
                 variant="outline"
                 size="icon"
                 className="rounded-full bg-background shadow-none"
-                onClick={() => setAppearanceOpen((value) => !value)}
+                onClick={() => {
+                  setAppearanceOpen((value) => !value);
+                  setEngineOpen(false);
+                }}
                 aria-label="Appearance settings"
                 aria-expanded={appearanceOpen}
               >
