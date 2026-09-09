@@ -15,6 +15,7 @@ export type Paper = {
   landingUrl: string | null;
   source: string;
   type: string | null;
+  indexedIn: string[];
 };
 
 const inputSchema = z.object({
@@ -80,6 +81,7 @@ async function searchOpenAlex(i: z.infer<typeof inputSchema>): Promise<Paper[]> 
     landingUrl: w.doi ?? w.primary_location?.landing_page_url ?? null,
     source: "OpenAlex",
     type: w.type ?? null,
+    indexedIn: w.indexed_in ?? [],
   }));
 }
 
@@ -122,6 +124,7 @@ function mapCrossref(w: any): Paper {
     landingUrl: w.URL ?? null,
     source: "Crossref",
     type: w.type ?? null,
+    indexedIn: ["crossref"],
   };
 }
 
@@ -158,6 +161,7 @@ function mapS2(w: any): Paper {
     landingUrl: w.url ?? null,
     source: "Semantic Scholar",
     type: (w.publicationTypes ?? [])[0] ?? null,
+    indexedIn: w.externalIds?.PubMed ? ["pubmed"] : [],
   };
 }
 
@@ -195,6 +199,7 @@ async function searchPubMed(i: z.infer<typeof inputSchema>): Promise<Paper[]> {
         landingUrl: `https://pubmed.ncbi.nlm.nih.gov/${w.uid}/`,
         source: "PubMed",
         type: "article",
+        indexedIn: ["pubmed"],
       };
     });
 }
