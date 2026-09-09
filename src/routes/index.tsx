@@ -59,15 +59,17 @@ export const Route = createFileRoute("/")({
 type Theme = "light" | "dark";
 type EngineMode = "flash" | "pro" | "expert" | "deep" | "journal";
 
+const defaultEngine = {
+  id: "flash",
+  label: "Gemini Flash",
+  shortLabel: "Flash",
+  description: "Fast response mode",
+  icon: Gauge,
+  tone: "bg-engine-flash",
+} as const;
+
 const engineModes = [
-  {
-    id: "flash",
-    label: "Gemini Flash",
-    shortLabel: "Flash",
-    description: "Fast response mode",
-    icon: Gauge,
-    tone: "bg-engine-flash",
-  },
+  defaultEngine,
   {
     id: "pro",
     label: "Gemini Pro",
@@ -158,7 +160,7 @@ function ResearchWorkspace() {
 
   const statuses = ["Scraping papers…", "Generating citations…", "Synthesizing PDF…"];
   const validAccent = /^#[0-9A-Fa-f]{6}$/.test(draftAccent);
-  const activeEngine = engineModes.find((mode) => mode.id === engineMode) ?? engineModes[0];
+  const activeEngine = engineModes.find((mode) => mode.id === engineMode) ?? defaultEngine;
   const ActiveEngineIcon = activeEngine.icon;
 
   const applyAccent = () => {
