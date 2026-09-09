@@ -1,24 +1,368 @@
 import { createFileRoute } from "@tanstack/react-router";
+import {
+  Archive,
+  BookMarked,
+  BookOpenText,
+  ChevronLeft,
+  ChevronRight,
+  CircleUserRound,
+  FileSearch,
+  FolderKanban,
+  History,
+  Library,
+  Menu,
+  MessageSquareText,
+  Moon,
+  Network,
+  Palette,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Plus,
+  Quote,
+  Search,
+  Send,
+  Sparkles,
+  Sun,
+  WandSparkles,
+  X,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Orbis — AI Academic Research Workspace" },
+      {
+        name: "description",
+        content: "Explore literature, synthesize papers, and organize academic research in Orbis.",
+      },
+      { property: "og:title", content: "Orbis — AI Academic Research Workspace" },
+      {
+        property: "og:description",
+        content: "A focused AI workspace for literature discovery, synthesis, and citations.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: ResearchWorkspace,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+type Theme = "light" | "dark";
+
+const recentSessions = [
+  { title: "Neural plasticity after stroke", time: "12 min" },
+  { title: "Climate adaptation policy", time: "Yesterday" },
+  { title: "Quantum sensing review", time: "Mon" },
+];
+
+const hubActions = [
+  { label: "Find papers", helper: "Search literature", icon: FileSearch, position: "hub-action-top" },
+  { label: "Map concepts", helper: "Connect findings", icon: Network, position: "hub-action-right" },
+  { label: "Cite sources", helper: "Build references", icon: Quote, position: "hub-action-bottom" },
+  { label: "Analyze PDF", helper: "Ask documents", icon: BookOpenText, position: "hub-action-left" },
+];
+
+function ResearchWorkspace() {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [appearanceOpen, setAppearanceOpen] = useState(false);
+  const [theme, setTheme] = useState<Theme>("light");
+  const [accent, setAccent] = useState("#177E76");
+  const [draftAccent, setDraftAccent] = useState("#177E76");
+  const [query, setQuery] = useState("");
+  const [statusIndex, setStatusIndex] = useState(0);
+
+  useEffect(() => {
+    const savedTheme = window.localStorage.getItem("orbis-theme");
+    const savedAccent = window.localStorage.getItem("orbis-accent");
+    const nextTheme: Theme = savedTheme === "dark" ? "dark" : "light";
+    const nextAccent = savedAccent && /^#[0-9A-Fa-f]{6}$/.test(savedAccent) ? savedAccent : "#177E76";
+    setTheme(nextTheme);
+    setAccent(nextAccent);
+    setDraftAccent(nextAccent);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    document.documentElement.style.setProperty("--user-accent", accent);
+    window.localStorage.setItem("orbis-theme", theme);
+    window.localStorage.setItem("orbis-accent", accent);
+  }, [theme, accent]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setStatusIndex((value) => (value + 1) % 3), 3800);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const statuses = ["Scraping papers…", "Generating citations…", "Synthesizing PDF…"];
+  const validAccent = /^#[0-9A-Fa-f]{6}$/.test(draftAccent);
+
+  const applyAccent = () => {
+    if (validAccent) setAccent(draftAccent.toUpperCase());
+  };
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
+    <div className="app-shell min-h-screen bg-background text-foreground">
+      {mobileOpen && (
+        <button
+          className="fixed inset-0 z-40 bg-foreground/20 backdrop-blur-[2px] lg:hidden"
+          aria-label="Close navigation"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      <aside
+        className={cn(
+          "sidebar fixed inset-y-0 left-0 z-50 flex flex-col border-r border-border bg-sidebar transition-[width,transform] duration-300",
+          sidebarOpen ? "w-72" : "w-[76px]",
+          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+        )}
+      >
+        <div className="grid h-20 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border px-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="brand-mark grid size-11 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
+              <Sparkles className="size-5" />
+            </div>
+            {sidebarOpen && (
+              <div className="min-w-0">
+                <p className="font-display truncate text-lg font-semibold">Orbis</p>
+                <p className="truncate text-xs text-muted-foreground">Research intelligence</p>
+              </div>
+            )}
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="hidden rounded-full lg:inline-flex"
+            onClick={() => setSidebarOpen((value) => !value)}
+            aria-label={sidebarOpen ? "Collapse navigation" : "Expand navigation"}
+            title={sidebarOpen ? "Collapse navigation" : "Expand navigation"}
+          >
+            {sidebarOpen ? <PanelLeftClose /> : <PanelLeftOpen />}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full lg:hidden"
+            onClick={() => setMobileOpen(false)}
+            aria-label="Close navigation"
+          >
+            <X />
+          </Button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-3 py-5">
+          <Button className={cn("h-11 rounded-full shadow-none", sidebarOpen ? "w-full justify-start px-4" : "w-11 px-0")}>
+            <Plus />
+            {sidebarOpen && <span>New research</span>}
+          </Button>
+
+          <nav aria-label="Research navigation" className="mt-7 space-y-7">
+            <NavGroup title="Workspace" open={sidebarOpen}>
+              <NavItem icon={History} label="Research history" open={sidebarOpen} active />
+              <NavItem icon={BookMarked} label="Saved papers" open={sidebarOpen} />
+              <NavItem icon={FolderKanban} label="Projects" open={sidebarOpen} />
+              <NavItem icon={Library} label="Source library" open={sidebarOpen} />
+            </NavGroup>
+
+            {sidebarOpen && (
+              <NavGroup title="Recent sessions" open>
+                {recentSessions.map((session, index) => (
+                  <button
+                    key={session.title}
+                    className="group w-full rounded-md px-3 py-2.5 text-left transition-colors hover:bg-sidebar-accent"
+                  >
+                    <span className="flex items-start gap-3">
+                      <span className={cn("mt-1.5 size-2 shrink-0 rounded-full", index === 0 ? "bg-primary" : "bg-signal")} />
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-medium">{session.title}</span>
+                        <span className="mt-0.5 block text-xs text-muted-foreground">{session.time}</span>
+                      </span>
+                    </span>
+                  </button>
+                ))}
+              </NavGroup>
+            )}
+          </nav>
+        </div>
+
+        <div className="border-t border-border p-3">
+          <button className={cn("flex w-full items-center rounded-full py-2 transition-colors hover:bg-sidebar-accent", sidebarOpen ? "gap-3 px-2" : "justify-center")}>
+            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground">
+              <CircleUserRound className="size-5" />
+            </span>
+            {sidebarOpen && (
+              <span className="min-w-0 text-left">
+                <span className="block truncate text-sm font-medium">Sign in with Google</span>
+                <span className="block truncate text-xs text-muted-foreground">Sync your workspace</span>
+              </span>
+            )}
+          </button>
+        </div>
+      </aside>
+
+      <div className={cn("min-w-0 transition-[padding] duration-300", sidebarOpen ? "lg:pl-72" : "lg:pl-[76px]")}>
+        <header className="sticky top-0 z-30 border-b border-border/80 bg-background/90 backdrop-blur-xl">
+          <div className="grid h-20 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 sm:px-6 lg:px-8">
+            <Button variant="ghost" size="icon" className="rounded-full lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation">
+              <Menu />
+            </Button>
+            <div className="min-w-0">
+              <h1 className="font-display truncate text-base font-semibold sm:text-lg">Research canvas</h1>
+              <p className="hidden truncate text-xs text-muted-foreground sm:block">Turn questions into evidence</p>
+            </div>
+
+            <div className="relative flex shrink-0 items-center gap-2">
+              <div className="hidden items-center gap-1 rounded-full border border-border bg-muted/60 p-1 sm:flex" aria-label="Workspace navigation">
+                <Button variant="ghost" size="sm" className="rounded-full bg-background px-4 shadow-sm">Canvas</Button>
+                <Button variant="ghost" size="sm" className="rounded-full px-4 text-muted-foreground">Library</Button>
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full bg-background shadow-none"
+                onClick={() => setAppearanceOpen((value) => !value)}
+                aria-label="Appearance settings"
+                aria-expanded={appearanceOpen}
+              >
+                <Palette />
+              </Button>
+              <button className="grid size-9 place-items-center rounded-full bg-foreground text-background" aria-label="Account menu" title="Account menu">
+                <span className="text-xs font-semibold">RP</span>
+              </button>
+
+              {appearanceOpen && (
+                <div className="appearance-panel absolute right-0 top-12 w-[min(20rem,calc(100vw-2rem))] rounded-lg border border-border bg-popover p-4 text-popover-foreground shadow-xl">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-display font-semibold">Appearance</p>
+                      <p className="text-xs text-muted-foreground">Saved on this device</p>
+                    </div>
+                    <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setAppearanceOpen(false)} aria-label="Close appearance settings"><X /></Button>
+                  </div>
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <Button variant={theme === "light" ? "default" : "outline"} className="rounded-full" onClick={() => setTheme("light")}><Sun /> Light</Button>
+                    <Button variant={theme === "dark" ? "default" : "outline"} className="rounded-full" onClick={() => setTheme("dark")}><Moon /> Dark</Button>
+                  </div>
+                  <label className="mt-5 block text-xs font-medium" htmlFor="accent">Custom accent</label>
+                  <div className="mt-2 grid grid-cols-[auto_minmax(0,1fr)_auto] gap-2">
+                    <input
+                      aria-label="Accent color picker"
+                      type="color"
+                      value={validAccent ? draftAccent : accent}
+                      onChange={(event) => setDraftAccent(event.target.value.toUpperCase())}
+                      className="size-10 cursor-pointer rounded-full border-0 bg-transparent p-0"
+                    />
+                    <input
+                      id="accent"
+                      value={draftAccent}
+                      onChange={(event) => setDraftAccent(event.target.value)}
+                      onKeyDown={(event) => event.key === "Enter" && applyAccent()}
+                      className="min-w-0 rounded-full border border-input bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+                      aria-invalid={!validAccent}
+                    />
+                    <Button size="sm" className="h-10 rounded-full" disabled={!validAccent} onClick={applyAccent}>Apply</Button>
+                  </div>
+                  {!validAccent && <p className="mt-2 text-xs text-destructive">Enter a six-digit hex color.</p>}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="activity-bar flex min-h-10 items-center justify-between gap-4 border-t border-border/60 px-4 sm:px-6 lg:px-8">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <span className="relative flex size-2.5 shrink-0">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-signal opacity-50" />
+                <span className="relative inline-flex size-2.5 rounded-full bg-signal" />
+              </span>
+              <span className="shrink-0 text-[11px] font-semibold uppercase text-muted-foreground">Live activity</span>
+              <span className="truncate text-xs font-medium" aria-live="polite">{statuses[statusIndex]}</span>
+            </div>
+            <div className="hidden items-center gap-1 text-xs text-muted-foreground sm:flex">
+              <span>3 tasks</span><ChevronRight className="size-3.5" />
+            </div>
+          </div>
+        </header>
+
+        <main className="workspace-grid min-h-[calc(100vh-7.5rem)] overflow-hidden px-4 py-8 sm:px-8 sm:py-10 lg:px-12">
+          <section className="mx-auto flex w-full max-w-6xl flex-col items-center">
+            <div className="mb-7 text-center sm:mb-10">
+              <p className="mb-3 text-xs font-semibold uppercase text-primary">AI research orbit</p>
+              <h2 className="font-display text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl">What are you investigating?</h2>
+              <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
+                Start with a question, paper, or concept. Orbis will trace the evidence around it.
+              </p>
+            </div>
+
+            <div className="hub-stage relative grid aspect-square w-full max-w-[42rem] place-items-center">
+              <div className="orbit orbit-outer absolute inset-[5%] rounded-full border border-dashed border-primary/25" />
+              <div className="orbit orbit-inner absolute inset-[19%] rounded-full border border-border" />
+              <div className="hub-glow absolute inset-[27%] rounded-full" />
+
+              {hubActions.map((action) => {
+                const Icon = action.icon;
+                return (
+                  <button key={action.label} className={cn("hub-action group absolute flex items-center gap-2.5 rounded-full border border-border bg-card p-2 pr-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md", action.position)}>
+                    <span className="grid size-9 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground"><Icon className="size-4" /></span>
+                    <span className="hidden sm:block">
+                      <span className="block text-xs font-semibold">{action.label}</span>
+                      <span className="block text-[10px] text-muted-foreground">{action.helper}</span>
+                    </span>
+                  </button>
+                );
+              })}
+
+              <form className="hub-core relative z-10 flex aspect-square w-[58%] max-w-[23rem] flex-col items-center justify-center rounded-full border border-primary/25 bg-card p-[9%] text-center shadow-2xl" onSubmit={(event) => event.preventDefault()}>
+                <span className="mb-4 grid size-12 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg"><WandSparkles className="size-5" /></span>
+                <label htmlFor="research-query" className="font-display text-base font-semibold sm:text-lg">Ask Orbis</label>
+                <textarea
+                  id="research-query"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder="How does sleep affect memory consolidation?"
+                  className="mt-2 min-h-16 w-full resize-none bg-transparent text-center text-xs leading-5 outline-none placeholder:text-muted-foreground sm:min-h-20 sm:text-sm"
+                />
+                <div className="mt-2 flex items-center gap-2">
+                  <Button type="button" variant="outline" size="icon" className="rounded-full bg-background" aria-label="Search sources" title="Search sources"><Search /></Button>
+                  <Button type="submit" className="rounded-full px-4 shadow-lg" disabled={!query.trim()}><span className="hidden sm:inline">Explore</span><Send /></Button>
+                </div>
+              </form>
+            </div>
+
+            <div className="mt-6 grid w-full max-w-3xl gap-3 sm:mt-4 sm:grid-cols-3">
+              {[
+                [MessageSquareText, "Compare methods", "Across selected studies"],
+                [Archive, "Build a review", "Organize the evidence"],
+                [BookOpenText, "Read with AI", "Interrogate a paper"],
+              ].map(([Icon, title, detail]) => {
+                const ActionIcon = Icon as typeof MessageSquareText;
+                return (
+                  <button key={title as string} className="quick-action flex min-w-0 items-center gap-3 rounded-md border border-border bg-card px-4 py-3 text-left transition-colors hover:border-primary/40 hover:bg-accent">
+                    <span className="grid size-9 shrink-0 place-items-center rounded-full bg-secondary"><ActionIcon className="size-4" /></span>
+                    <span className="min-w-0"><span className="block truncate text-xs font-semibold">{title as string}</span><span className="block truncate text-[11px] text-muted-foreground">{detail as string}</span></span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        </main>
+      </div>
     </div>
+  );
+}
+
+function NavGroup({ title, open, children }: { title: string; open: boolean; children: React.ReactNode }) {
+  return <div>{open && <p className="mb-2 px-3 text-[10px] font-semibold uppercase text-muted-foreground">{title}</p>}<div className="space-y-1">{children}</div></div>;
+}
+
+function NavItem({ icon: Icon, label, open, active = false }: { icon: typeof History; label: string; open: boolean; active?: boolean }) {
+  return (
+    <button title={!open ? label : undefined} className={cn("flex h-10 w-full items-center rounded-full text-sm transition-colors", open ? "gap-3 px-3" : "justify-center", active ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground" : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground")}>
+      <Icon className="size-4 shrink-0" />{open && <span className="truncate">{label}</span>}
+    </button>
   );
 }
