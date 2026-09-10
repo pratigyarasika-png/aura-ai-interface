@@ -143,6 +143,31 @@ function SearchDiscovery() {
     });
   };
 
+  const searchMutate = search.mutate;
+  const autoRan = useRef(false);
+  useEffect(() => {
+    const savedTheme = window.localStorage.getItem("orbis-theme");
+    const savedAccent = window.localStorage.getItem("orbis-accent");
+    document.documentElement.classList.toggle("dark", savedTheme === "dark");
+    if (savedAccent && /^#[0-9A-Fa-f]{6}$/.test(savedAccent)) {
+      document.documentElement.style.setProperty("--user-accent", savedAccent);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (autoRan.current || !q?.trim()) return;
+    autoRan.current = true;
+    searchMutate({
+      query: q.trim(),
+      source: "openalex",
+      mode: "keyword",
+      yearFrom: 2015,
+      yearTo: CURRENT_YEAR,
+      openAccessOnly: false,
+      sort: "relevance",
+    });
+  }, [q, searchMutate]);
+
   const papers = useMemo(() => {
     const list = search.data?.papers ?? [];
     return list.filter((paper) => {
