@@ -17,7 +17,7 @@ import {
   SlidersHorizontal,
   Unlock,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -41,6 +41,9 @@ export const Route = createFileRoute("/search")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+  }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    q: typeof search["q"] === "string" ? (search["q"] as string) : undefined,
   }),
   component: SearchDiscovery,
 });
@@ -102,7 +105,8 @@ const viewers = [
 
 function SearchDiscovery() {
   const runSearch = useServerFn(searchPapers);
-  const [query, setQuery] = useState("");
+  const { q } = Route.useSearch();
+  const [query, setQuery] = useState(q ?? "");
   const [mode, setMode] = useState<QueryMode>("keyword");
   const [source, setSource] = useState<SourceId>("openalex");
   const [years, setYears] = useState<[number, number]>([2015, CURRENT_YEAR]);
@@ -138,6 +142,37 @@ function SearchDiscovery() {
       sort,
     });
   };
+
+  const searchMutate = search.mutate;
+  const autoRan = useRef(false);
+  useEffect(() => {
+    const savedTheme = window.localStorage.getItem("orbis-theme");
+    const savedAccent = window.localStorage.getItem("orbis-accent");
+    document.documentElement.classList.toggle("dark", savedTheme === "dark");
+    if (savedAccent && /^#[0-9A-Fa-f]{6}$/.test(savedAccent)) {
+      document.documentElement.style.setProperty("--user-accent", savedAccent);
+      document.documentElement.style.setProperty(
+        "--accent-on",
+        savedAccent.replace("#", "").match(/../g)!.map((h) => parseInt(h, 16)).reduce((a, c, i) => a + [0.2126, 0.7152, 0.0722][i]! * (c / 255 <= 0.03928 ? c / 255 / 12.92 : ((c / 255 + 0.055) / 1.055) ** 2.4), 0) > 0.45
+          ? "oklch(0.2 0.025 250)"
+          : "oklch(0.99 0 0)",
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    if (autoRan.current || !q?.trim()) return;
+    autoRan.current = true;
+    searchMutate({
+      query: q.trim(),
+      source: "openalex",
+      mode: "keyword",
+      yearFrom: 2015,
+      yearTo: CURRENT_YEAR,
+      openAccessOnly: false,
+      sort: "relevance",
+    });
+  }, [q, searchMutate]);
 
   const papers = useMemo(() => {
     const list = search.data?.papers ?? [];

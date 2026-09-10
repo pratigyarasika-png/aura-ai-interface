@@ -44,10 +44,17 @@ function reconstructAbstract(inverted?: Record<string, number[]> | null) {
   return clean(slots.join(" "));
 }
 
-async function getJson(url: string) {
-  const res = await fetch(url, {
+async function getJson(url: string, attempt = 0): Promise<any> {
+  const polite = url.includes("api.openalex.org") && !url.includes("mailto=")
+    ? `${url}&mailto=research@orbis.app`
+    : url;
+  const res = await fetch(polite, {
     headers: { Accept: "application/json", "User-Agent": UA },
   });
+  if ((res.status === 429 || res.status >= 500) && attempt < 2) {
+    await new Promise((resolve) => setTimeout(resolve, 700 * (attempt + 1)));
+    return getJson(url, attempt + 1);
+  }
   if (!res.ok) throw new Error(`Upstream ${res.status}`);
   return res.json() as Promise<any>;
 }
@@ -207,19 +214,39 @@ async function searchPubMed(i: z.infer<typeof inputSchema>): Promise<Paper[]> {
 export const searchPapers = createServerFn({ method: "GET" })
   .inputValidator((data: unknown) => inputSchema.parse(data))
   .handler(async ({ data }): Promise<{ papers: Paper[]; notice: string | null }> => {
+    const runners = {
+      openalex: searchOpenAlex,
+      crossref: searchCrossref,
+      semanticscholar: searchSemanticScholar,
+      pubmed: searchPubMed,
+    } as const;
+    const order = [data.source, ...(["openalex", "crossref", "semanticscholar", "pubmed"] as const).filter((s) => s !== data.source)];
+
     try {
       let papers: Paper[] = [];
-      if (data.source === "openalex") papers = await searchOpenAlex(data);
-      else if (data.source === "crossref") papers = await searchCrossref(data);
-      else if (data.source === "semanticscholar") papers = await searchSemanticScholar(data);
-      else papers = await searchPubMed(data);
+      let usedFallback: string | null = null;
+      let lastError: unknown = null;
+      for (const source of order) {
+        try {
+          papers = await runners[source](data);
+          if (source !== data.source) usedFallback = source;
+          break;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+      if (!papers.length && lastError && usedFallback === null) throw lastError;
 
       if (data.sort === "citations") papers = [...papers].sort((a, b) => b.citations - a.citations);
       if (data.sort === "year") papers = [...papers].sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
 
       return {
         papers,
-        notice: papers.length ? null : "No records matched these filters.",
+        notice: usedFallback
+          ? `Your chosen source was unavailable, so these results come from ${usedFallback}.`
+          : papers.length
+            ? null
+            : "No records matched these filters.",
       };
     } catch (error) {
       return {
