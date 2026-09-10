@@ -443,19 +443,24 @@ function ResearchWorkspace() {
 
               {hubActions.map((action) => {
                 const Icon = action.icon;
-                const Component = (action.search ? Link : "button") as typeof Link;
-                return (
-                  <Component
-                    key={action.label}
-                    {...(action.search ? { to: "/search", search: { q: query.trim() || undefined } } : { type: "button" as const })}
-                    className={cn("hub-action group absolute flex items-center gap-2.5 rounded-full border border-border bg-card p-2 pr-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md", action.position)}
-                  >
+                const cls = cn("hub-action group absolute flex items-center gap-2.5 rounded-full border border-border bg-card p-2 pr-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md", action.position);
+                const inner = (
+                  <>
                     <span className="grid size-9 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground"><Icon className="size-4" /></span>
                     <span className="hidden sm:block">
                       <span className="block text-xs font-semibold">{action.label}</span>
                       <span className="block text-[10px] text-muted-foreground">{action.helper}</span>
                     </span>
-                  </Component>
+                  </>
+                );
+                return action.search ? (
+                  <Link key={action.label} to="/search" search={{ q: query.trim() || undefined }} className={cls}>
+                    {inner}
+                  </Link>
+                ) : (
+                  <button key={action.label} type="button" className={cls}>
+                    {inner}
+                  </button>
                 );
               })}
 
