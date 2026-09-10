@@ -17,7 +17,7 @@ import {
   SlidersHorizontal,
   Unlock,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -41,6 +41,9 @@ export const Route = createFileRoute("/search")({
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
+  }),
+  validateSearch: (search: Record<string, unknown>) => ({
+    q: typeof search.q === "string" ? search.q : undefined,
   }),
   component: SearchDiscovery,
 });
