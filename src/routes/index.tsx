@@ -136,6 +136,7 @@ function accentForeground(hex: string) {
 }
 
 function ResearchWorkspace() {
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [appearanceOpen, setAppearanceOpen] = useState(false);
@@ -230,9 +231,11 @@ function ResearchWorkspace() {
         </div>
 
         <div className="flex-1 overflow-y-auto px-3 py-5">
-          <Button className={cn("h-11 rounded-full shadow-none", sidebarOpen ? "w-full justify-start px-4" : "w-11 px-0")}>
-            <Plus />
-            {sidebarOpen && <span>New research</span>}
+          <Button asChild className={cn("h-11 rounded-full shadow-none", sidebarOpen ? "w-full justify-start px-4" : "w-11 px-0")}>
+            <Link to="/search" search={{ q: undefined }} title="New research">
+              <Plus />
+              {sidebarOpen && <span>New research</span>}
+            </Link>
           </Button>
 
           <nav aria-label="Research navigation" className="mt-7 space-y-7">
@@ -240,6 +243,7 @@ function ResearchWorkspace() {
               <NavItem icon={History} label="Research history" open={sidebarOpen} active />
               <NavItem icon={BookMarked} label="Saved papers" open={sidebarOpen} />
               <NavItem icon={FolderKanban} label="Projects" open={sidebarOpen} />
+              <NavItem icon={Search} label="Search & discovery" open={sidebarOpen} to="/search" />
               <NavItem icon={Library} label="Source library" open={sidebarOpen} />
             </NavGroup>
 
@@ -439,18 +443,26 @@ function ResearchWorkspace() {
 
               {hubActions.map((action) => {
                 const Icon = action.icon;
+                const Component = (action.search ? Link : "button") as typeof Link;
                 return (
-                  <button key={action.label} className={cn("hub-action group absolute flex items-center gap-2.5 rounded-full border border-border bg-card p-2 pr-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md", action.position)}>
+                  <Component
+                    key={action.label}
+                    {...(action.search ? { to: "/search", search: { q: query.trim() || undefined } } : { type: "button" as const })}
+                    className={cn("hub-action group absolute flex items-center gap-2.5 rounded-full border border-border bg-card p-2 pr-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-md", action.position)}
+                  >
                     <span className="grid size-9 shrink-0 place-items-center rounded-full bg-secondary text-secondary-foreground transition-colors group-hover:bg-primary group-hover:text-primary-foreground"><Icon className="size-4" /></span>
                     <span className="hidden sm:block">
                       <span className="block text-xs font-semibold">{action.label}</span>
                       <span className="block text-[10px] text-muted-foreground">{action.helper}</span>
                     </span>
-                  </button>
+                  </Component>
                 );
               })}
 
-              <form className="hub-core relative z-10 flex aspect-square w-[58%] max-w-[23rem] flex-col items-center justify-center rounded-full border border-primary/25 bg-card p-[9%] text-center shadow-2xl" onSubmit={(event) => event.preventDefault()}>
+              <form className="hub-core relative z-10 flex aspect-square w-[58%] max-w-[23rem] flex-col items-center justify-center rounded-full border border-primary/25 bg-card p-[9%] text-center shadow-2xl" onSubmit={(event) => {
+                  event.preventDefault();
+                  if (query.trim()) navigate({ to: "/search", search: { q: query.trim() } });
+                }}>
                 <span className="mb-4 grid size-12 place-items-center rounded-full bg-primary text-primary-foreground shadow-lg"><WandSparkles className="size-5" /></span>
                 <label htmlFor="research-query" className="font-display text-base font-semibold sm:text-lg">Ask Orbis</label>
                 <textarea
@@ -461,7 +473,9 @@ function ResearchWorkspace() {
                   className="mt-2 min-h-16 w-full resize-none bg-transparent text-center text-xs leading-5 outline-none placeholder:text-muted-foreground sm:min-h-20 sm:text-sm"
                 />
                 <div className="mt-2 flex items-center gap-2">
-                  <Button type="button" variant="outline" size="icon" className="rounded-full bg-background" aria-label="Search sources" title="Search sources"><Search /></Button>
+                  <Button asChild type="button" variant="outline" size="icon" className="rounded-full bg-background">
+                    <Link to="/search" search={{ q: query.trim() || undefined }} aria-label="Open search & discovery" title="Search & discovery"><Search /></Link>
+                  </Button>
                   <Button type="submit" className="rounded-full px-4 shadow-lg" disabled={!query.trim()}><span className="hidden sm:inline">Explore</span><Send /></Button>
                 </div>
               </form>
@@ -493,10 +507,20 @@ function NavGroup({ title, open, children }: { title: string; open: boolean; chi
   return <div>{open && <p className="mb-2 px-3 text-[10px] font-semibold uppercase text-muted-foreground">{title}</p>}<div className="space-y-1">{children}</div></div>;
 }
 
-function NavItem({ icon: Icon, label, open, active = false }: { icon: typeof History; label: string; open: boolean; active?: boolean }) {
-  return (
-    <button title={!open ? label : undefined} className={cn("flex h-10 w-full items-center rounded-full text-sm transition-colors", open ? "gap-3 px-3" : "justify-center", active ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground" : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground")}>
-      <Icon className="size-4 shrink-0" />{open && <span className="truncate">{label}</span>}
-    </button>
+function NavItem({ icon: Icon, label, open, active = false, to }: { icon: typeof History; label: string; open: boolean; active?: boolean; to?: "/search" }) {
+  const className = cn("flex h-10 w-full items-center rounded-full text-sm transition-colors", open ? "gap-3 px-3" : "justify-center", active ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground" : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground");
+  const inner = (
+    <>
+      <Icon className="size-4 shrink-0" />
+      {open && <span className="truncate">{label}</span>}
+    </>
   );
+  if (to) {
+    return (
+      <Link to={to} search={{ q: undefined }} title={!open ? label : undefined} className={className} activeProps={{ className: "bg-sidebar-accent font-medium text-sidebar-accent-foreground" }}>
+        {inner}
+      </Link>
+    );
+  }
+  return <button title={!open ? label : undefined} className={className}>{inner}</button>;
 }
