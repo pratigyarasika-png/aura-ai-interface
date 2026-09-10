@@ -105,7 +105,8 @@ const viewers = [
 
 function SearchDiscovery() {
   const runSearch = useServerFn(searchPapers);
-  const [query, setQuery] = useState("");
+  const { q } = Route.useSearch();
+  const [query, setQuery] = useState(q ?? "");
   const [mode, setMode] = useState<QueryMode>("keyword");
   const [source, setSource] = useState<SourceId>("openalex");
   const [years, setYears] = useState<[number, number]>([2015, CURRENT_YEAR]);
