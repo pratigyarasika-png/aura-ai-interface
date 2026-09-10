@@ -151,6 +151,12 @@ function SearchDiscovery() {
     document.documentElement.classList.toggle("dark", savedTheme === "dark");
     if (savedAccent && /^#[0-9A-Fa-f]{6}$/.test(savedAccent)) {
       document.documentElement.style.setProperty("--user-accent", savedAccent);
+      document.documentElement.style.setProperty(
+        "--accent-on",
+        savedAccent.replace("#", "").match(/../g)!.map((h) => parseInt(h, 16)).reduce((a, c, i) => a + [0.2126, 0.7152, 0.0722][i]! * (c / 255 <= 0.03928 ? c / 255 / 12.92 : ((c / 255 + 0.055) / 1.055) ** 2.4), 0) > 0.45
+          ? "oklch(0.2 0.025 250)"
+          : "oklch(0.99 0 0)",
+      );
     }
   }, []);
 
