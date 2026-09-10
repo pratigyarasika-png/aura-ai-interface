@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Archive,
   Bot,
@@ -118,11 +118,22 @@ const recentSessions = [
 ];
 
 const hubActions = [
-  { label: "Find papers", helper: "Search literature", icon: FileSearch, position: "hub-action-top" },
-  { label: "Map concepts", helper: "Connect findings", icon: Network, position: "hub-action-right" },
-  { label: "Cite sources", helper: "Build references", icon: Quote, position: "hub-action-bottom" },
-  { label: "Analyze PDF", helper: "Ask documents", icon: BookOpenText, position: "hub-action-left" },
+  { label: "Find papers", helper: "Search literature", icon: FileSearch, position: "hub-action-top", search: true },
+  { label: "Map concepts", helper: "Connect findings", icon: Network, position: "hub-action-right", search: false },
+  { label: "Cite sources", helper: "Build references", icon: Quote, position: "hub-action-bottom", search: false },
+  { label: "Analyze PDF", helper: "Ask documents", icon: BookOpenText, position: "hub-action-left", search: false },
 ];
+
+/** Readable text color for a hex accent, so light accents stay legible. */
+function accentForeground(hex: string) {
+  const value = hex.replace("#", "");
+  const channels = [0, 2, 4].map((i) => {
+    const c = parseInt(value.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  const luminance = 0.2126 * channels[0]! + 0.7152 * channels[1]! + 0.0722 * channels[2]!;
+  return luminance > 0.45 ? "oklch(0.2 0.025 250)" : "oklch(0.99 0 0)";
+}
 
 function ResearchWorkspace() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
