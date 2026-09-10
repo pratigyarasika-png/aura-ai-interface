@@ -429,7 +429,7 @@ function ResearchWorkspace() {
         <main className="workspace-grid min-h-[calc(100vh-7.5rem)] overflow-hidden px-4 py-8 sm:px-8 sm:py-10 lg:px-12">
           <section className="mx-auto flex w-full max-w-6xl flex-col items-center">
             <div className="mb-7 text-center sm:mb-10">
-              <p className="mb-3 text-xs font-semibold uppercase text-primary">AI research orbit</p>
+              <p className="mb-3 text-xs font-semibold uppercase text-primary-ink">AI research orbit</p>
               <h2 className="font-display text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl">What are you investigating?</h2>
               <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-muted-foreground sm:text-base">
                 Start with a question, paper, or concept. Orbis will trace the evidence around it.
