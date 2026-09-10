@@ -160,6 +160,7 @@ function ResearchWorkspace() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
     document.documentElement.style.setProperty("--user-accent", accent);
+    document.documentElement.style.setProperty("--accent-on", accentForeground(accent));
     window.localStorage.setItem("orbis-theme", theme);
     window.localStorage.setItem("orbis-accent", accent);
   }, [theme, accent]);
