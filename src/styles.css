@@ -72,7 +72,8 @@
 
 :root {
   --radius: 0.5rem;
-  --user-accent: #177e76;
+  --user-accent: #0D9488;
+
   --background: oklch(0.975 0.006 95);
   --foreground: oklch(0.22 0.025 250);
   --card: oklch(0.995 0.002 95);
@@ -199,6 +200,17 @@
   .hub-action-bottom { bottom: 0; }
 }
 
+.document-editor { font-size: 0.95rem; line-height: 1.85; }
+.document-editor h2 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; margin: 1.25rem 0 0.5rem; }
+.document-editor p { margin: 0 0 0.85rem; }
+.document-editor ul { list-style: disc; padding-left: 1.4rem; margin: 0 0 0.85rem; }
+.document-editor .cite-marker {
+  color: var(--primary-ink);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
 }
+
