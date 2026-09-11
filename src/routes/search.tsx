@@ -22,7 +22,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
+import { applySavedAppearance } from "@/lib/theme";
+import { addToLibrary, loadLibrary, removeFromLibrary } from "@/lib/library";
 import { searchPapers, type Paper } from "@/lib/search.functions";
+
 
 export const Route = createFileRoute("/search")({
   head: () => ({
@@ -146,19 +149,9 @@ function SearchDiscovery() {
   const searchMutate = search.mutate;
   const autoRan = useRef(false);
   useEffect(() => {
-    const savedTheme = window.localStorage.getItem("orbis-theme");
-    const savedAccent = window.localStorage.getItem("orbis-accent");
-    document.documentElement.classList.toggle("dark", savedTheme === "dark");
-    if (savedAccent && /^#[0-9A-Fa-f]{6}$/.test(savedAccent)) {
-      document.documentElement.style.setProperty("--user-accent", savedAccent);
-      document.documentElement.style.setProperty(
-        "--accent-on",
-        savedAccent.replace("#", "").match(/../g)!.map((h) => parseInt(h, 16)).reduce((a, c, i) => a + [0.2126, 0.7152, 0.0722][i]! * (c / 255 <= 0.03928 ? c / 255 / 12.92 : ((c / 255 + 0.055) / 1.055) ** 2.4), 0) > 0.45
-          ? "oklch(0.2 0.025 250)"
-          : "oklch(0.99 0 0)",
-      );
-    }
+    applySavedAppearance();
   }, []);
+
 
   useEffect(() => {
     if (autoRan.current || !q?.trim()) return;
