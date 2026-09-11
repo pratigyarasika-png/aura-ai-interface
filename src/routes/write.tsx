@@ -140,9 +140,10 @@ function WritingWorkspace() {
   const citePaper = (paper: SavedPaper) => insert(`${marker(paper)}&nbsp;`);
 
   const insertQuote = (paper: SavedPaper) => {
-    const source = paper.abstract_snippet ?? "";
+    const source = (paper.snippet ?? "").trim().slice(0, 280) || paper.title;
     insert(`<p>&ldquo;${escapeHtml(source)}&rdquo; ${marker(paper)}</p><p><br></p>`);
   };
+
 
   const format = (command: string, value?: string) => {
     focusEditor();

@@ -6,7 +6,9 @@ export type SavedPaper = {
   venue: string | null;
   doi: string | null;
   url: string | null;
+  snippet?: string | null;
 };
+
 
 export const LIBRARY_KEY = "orbis-library";
 export const LIBRARY_EVENT = "orbis-library-change";
