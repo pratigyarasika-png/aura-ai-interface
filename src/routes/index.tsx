@@ -117,12 +117,20 @@ const recentSessions = [
   { title: "Quantum sensing review", time: "Mon" },
 ];
 
-const hubActions = [
-  { label: "Find papers", helper: "Search literature", icon: FileSearch, position: "hub-action-top", search: true },
-  { label: "Map concepts", helper: "Connect findings", icon: Network, position: "hub-action-right", search: false },
-  { label: "Cite sources", helper: "Build references", icon: Quote, position: "hub-action-bottom", search: false },
-  { label: "Analyze PDF", helper: "Ask documents", icon: BookOpenText, position: "hub-action-left", search: false },
+const hubActions: Array<{
+  label: string;
+  helper: string;
+  icon: typeof FileSearch;
+  position: string;
+  to?: "/search" | "/write";
+  withQuery?: boolean;
+}> = [
+  { label: "Find papers", helper: "Search literature", icon: FileSearch, position: "hub-action-top", to: "/search", withQuery: true },
+  { label: "Map concepts", helper: "Connect findings", icon: Network, position: "hub-action-right" },
+  { label: "Cite sources", helper: "Build references", icon: Quote, position: "hub-action-bottom", to: "/write" },
+  { label: "Analyze PDF", helper: "Ask documents", icon: BookOpenText, position: "hub-action-left" },
 ];
+
 
 /** Readable text color for a hex accent, so light accents stay legible. */
 function accentForeground(hex: string) {
