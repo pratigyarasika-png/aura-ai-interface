@@ -407,7 +407,31 @@ function ResearchWorkspace() {
                     <Button variant={theme === "light" ? "default" : "outline"} className="rounded-full" onClick={() => setTheme("light")}><Sun /> Light</Button>
                     <Button variant={theme === "dark" ? "default" : "outline"} className="rounded-full" onClick={() => setTheme("dark")}><Moon /> Dark</Button>
                   </div>
+                  <p className="mt-5 text-xs font-medium">Preset accents</p>
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    {accentPresets.map((preset) => (
+                      <button
+                        key={preset.value}
+                        type="button"
+                        onClick={() => {
+                          setAccent(preset.value);
+                          setDraftAccent(preset.value);
+                        }}
+                        aria-pressed={accent.toUpperCase() === preset.value.toUpperCase()}
+                        className={cn(
+                          "flex items-center gap-2 rounded-full border px-3 py-2 text-left text-[11px] font-semibold transition-colors",
+                          accent.toUpperCase() === preset.value.toUpperCase()
+                            ? "border-primary bg-accent text-accent-foreground"
+                            : "border-border hover:bg-muted",
+                        )}
+                      >
+                        <span className="size-4 shrink-0 rounded-full border border-border" style={{ backgroundColor: preset.value }} />
+                        <span className="truncate">{preset.label}</span>
+                      </button>
+                    ))}
+                  </div>
                   <label className="mt-5 block text-xs font-medium" htmlFor="accent">Custom accent</label>
+
                   <div className="mt-2 grid grid-cols-[auto_minmax(0,1fr)_auto] gap-2">
                     <input
                       aria-label="Accent color picker"
