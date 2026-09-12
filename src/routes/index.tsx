@@ -151,8 +151,8 @@ function ResearchWorkspace() {
   const [engineOpen, setEngineOpen] = useState(false);
   const [engineMode, setEngineMode] = useState<EngineMode>("flash");
   const [theme, setTheme] = useState<Theme>("light");
-  const [accent, setAccent] = useState("#177E76");
-  const [draftAccent, setDraftAccent] = useState("#177E76");
+  const [accent, setAccent] = useState(DEFAULT_ACCENT);
+  const [draftAccent, setDraftAccent] = useState(DEFAULT_ACCENT);
   const [query, setQuery] = useState("");
   const [statusIndex, setStatusIndex] = useState(0);
 
@@ -160,11 +160,12 @@ function ResearchWorkspace() {
     const savedTheme = window.localStorage.getItem("orbis-theme");
     const savedAccent = window.localStorage.getItem("orbis-accent");
     const nextTheme: Theme = savedTheme === "dark" ? "dark" : "light";
-    const nextAccent = savedAccent && /^#[0-9A-Fa-f]{6}$/.test(savedAccent) ? savedAccent : "#177E76";
+    const nextAccent = savedAccent && isHex(savedAccent) ? savedAccent : DEFAULT_ACCENT;
     setTheme(nextTheme);
     setAccent(nextAccent);
     setDraftAccent(nextAccent);
   }, []);
+
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
