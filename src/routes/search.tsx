@@ -15,6 +15,8 @@ import {
   Globe,
   GraduationCap,
   Loader2,
+  PenLine,
+
   Quote,
   Search,
   SlidersHorizontal,
