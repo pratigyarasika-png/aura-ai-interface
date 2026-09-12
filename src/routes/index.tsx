@@ -22,6 +22,8 @@ import {
   Palette,
   PanelLeftClose,
   PanelLeftOpen,
+  PenLine,
+
   Plus,
   Quote,
   Search,
