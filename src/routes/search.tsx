@@ -199,6 +199,13 @@ function SearchDiscovery() {
               Free academic APIs, one query surface
             </p>
           </div>
+          <Button asChild variant="outline" className="ml-auto shrink-0 rounded-full">
+            <Link to="/write">
+              <PenLine />
+              <span className="hidden sm:inline">Writing workspace</span>
+            </Link>
+          </Button>
+
         </div>
       </header>
 
