@@ -299,12 +299,23 @@ function ResearchWorkspace() {
             <Button variant="ghost" size="icon" className="rounded-full lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation">
               <Menu />
             </Button>
-            <div className="min-w-0">
-              <h1 className="font-display truncate text-base font-semibold sm:text-lg">Research canvas</h1>
-              <p className="hidden truncate text-xs text-muted-foreground sm:block">Turn questions into evidence</p>
+            <div className="flex min-w-0 items-center gap-6">
+              <div className="min-w-0">
+                <h1 className="font-display truncate text-base font-semibold sm:text-lg">Research canvas</h1>
+                <p className="hidden truncate text-xs text-muted-foreground sm:block">Turn questions into evidence</p>
+              </div>
+              <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
+                <Link to="/search" className="rounded-full px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" activeProps={{ className: "bg-accent text-accent-foreground" }}>
+                  Search
+                </Link>
+                <Link to="/write" className="rounded-full px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" activeProps={{ className: "bg-accent text-accent-foreground" }}>
+                  Writing workspace
+                </Link>
+              </nav>
             </div>
 
-            <div className="relative flex shrink-0 items-center gap-2">
+            <div className="relative ml-auto flex shrink-0 items-center justify-end gap-2">
+
               <div className="relative">
                 <Button
                   variant="outline"
