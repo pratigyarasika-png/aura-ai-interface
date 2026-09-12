@@ -244,7 +244,9 @@ function ResearchWorkspace() {
               <NavItem icon={BookMarked} label="Saved papers" open={sidebarOpen} />
               <NavItem icon={FolderKanban} label="Projects" open={sidebarOpen} />
               <NavItem icon={Search} label="Search & discovery" open={sidebarOpen} to="/search" />
-              <NavItem icon={Library} label="Source library" open={sidebarOpen} />
+              <NavItem icon={PenLine} label="Writing workspace" open={sidebarOpen} to="/write" />
+              <NavItem icon={Library} label="Source library" open={sidebarOpen} to="/write" />
+
             </NavGroup>
 
             {sidebarOpen && (
@@ -512,7 +514,7 @@ function NavGroup({ title, open, children }: { title: string; open: boolean; chi
   return <div>{open && <p className="mb-2 px-3 text-[10px] font-semibold uppercase text-muted-foreground">{title}</p>}<div className="space-y-1">{children}</div></div>;
 }
 
-function NavItem({ icon: Icon, label, open, active = false, to }: { icon: typeof History; label: string; open: boolean; active?: boolean; to?: "/search" }) {
+function NavItem({ icon: Icon, label, open, active = false, to }: { icon: typeof History; label: string; open: boolean; active?: boolean; to?: "/search" | "/write" }) {
   const className = cn("flex h-10 w-full items-center rounded-full text-sm transition-colors", open ? "gap-3 px-3" : "justify-center", active ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground" : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground");
   const inner = (
     <>
@@ -522,7 +524,7 @@ function NavItem({ icon: Icon, label, open, active = false, to }: { icon: typeof
   );
   if (to) {
     return (
-      <Link to={to} search={{ q: undefined }} title={!open ? label : undefined} className={className} activeProps={{ className: "bg-sidebar-accent font-medium text-sidebar-accent-foreground" }}>
+      <Link to={to} title={!open ? label : undefined} className={className} activeProps={{ className: "bg-sidebar-accent font-medium text-sidebar-accent-foreground" }}>
         {inner}
       </Link>
     );
