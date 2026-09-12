@@ -450,6 +450,17 @@ function PaperCard({ paper }: { paper: Paper }) {
         <span className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-[11px] font-semibold">
           <Quote className="size-3" /> {paper.citations} citations
         </span>
+        <Button
+          size="sm"
+          variant={saved ? "default" : "outline"}
+          className="rounded-full"
+          onClick={toggleSaved}
+          aria-pressed={saved}
+        >
+          {saved ? <BookmarkCheck /> : <BookmarkPlus />}
+          {saved ? "Saved to library" : "Save to library"}
+        </Button>
+
         {paper.pdfUrl && (
           <Button asChild size="sm" className="rounded-full">
             <a href={paper.pdfUrl} target="_blank" rel="noreferrer">
