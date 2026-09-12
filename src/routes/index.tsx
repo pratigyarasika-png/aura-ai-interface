@@ -34,7 +34,9 @@ import {
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { DEFAULT_ACCENT, accentForeground, accentPresets, isHex } from "@/lib/theme";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
