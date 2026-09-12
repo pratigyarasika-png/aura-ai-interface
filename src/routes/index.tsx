@@ -302,7 +302,7 @@ function ResearchWorkspace() {
                 <p className="hidden truncate text-xs text-muted-foreground sm:block">Turn questions into evidence</p>
               </div>
               <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
-                <Link to="/search" className="rounded-full px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" activeProps={{ className: "bg-accent text-accent-foreground" }}>
+                <Link to="/search" search={{ q: undefined }} className="rounded-full px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" activeProps={{ className: "bg-accent text-accent-foreground" }}>
                   Search
                 </Link>
                 <Link to="/write" className="rounded-full px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" activeProps={{ className: "bg-accent text-accent-foreground" }}>
