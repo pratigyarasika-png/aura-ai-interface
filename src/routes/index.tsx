@@ -463,15 +463,26 @@ function ResearchWorkspace() {
                     </span>
                   </>
                 );
-                return action.search ? (
-                  <Link key={action.label} to="/search" search={{ q: query.trim() || undefined }} className={cls}>
-                    {inner}
-                  </Link>
-                ) : (
+                if (action.to === "/search") {
+                  return (
+                    <Link key={action.label} to="/search" search={{ q: query.trim() || undefined }} className={cls}>
+                      {inner}
+                    </Link>
+                  );
+                }
+                if (action.to === "/write") {
+                  return (
+                    <Link key={action.label} to="/write" className={cls}>
+                      {inner}
+                    </Link>
+                  );
+                }
+                return (
                   <button key={action.label} type="button" className={cls}>
                     {inner}
                   </button>
                 );
+
               })}
 
               <form className="hub-core relative z-10 flex aspect-square w-[58%] max-w-[23rem] flex-col items-center justify-center rounded-full border border-primary/25 bg-card p-[9%] text-center shadow-2xl" onSubmit={(event) => {
