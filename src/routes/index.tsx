@@ -22,6 +22,8 @@ import {
   Palette,
   PanelLeftClose,
   PanelLeftOpen,
+  PenLine,
+
   Plus,
   Quote,
   Search,
@@ -34,7 +36,9 @@ import {
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { DEFAULT_ACCENT, accentForeground, accentPresets, isHex } from "@/lib/theme";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -117,23 +121,23 @@ const recentSessions = [
   { title: "Quantum sensing review", time: "Mon" },
 ];
 
-const hubActions = [
-  { label: "Find papers", helper: "Search literature", icon: FileSearch, position: "hub-action-top", search: true },
-  { label: "Map concepts", helper: "Connect findings", icon: Network, position: "hub-action-right", search: false },
-  { label: "Cite sources", helper: "Build references", icon: Quote, position: "hub-action-bottom", search: false },
-  { label: "Analyze PDF", helper: "Ask documents", icon: BookOpenText, position: "hub-action-left", search: false },
+const hubActions: Array<{
+  label: string;
+  helper: string;
+  icon: typeof FileSearch;
+  position: string;
+  to?: "/search" | "/write";
+  withQuery?: boolean;
+}> = [
+  { label: "Find papers", helper: "Search literature", icon: FileSearch, position: "hub-action-top", to: "/search", withQuery: true },
+  { label: "Map concepts", helper: "Connect findings", icon: Network, position: "hub-action-right" },
+  { label: "Cite sources", helper: "Build references", icon: Quote, position: "hub-action-bottom", to: "/write" },
+  { label: "Analyze PDF", helper: "Ask documents", icon: BookOpenText, position: "hub-action-left" },
 ];
 
-/** Readable text color for a hex accent, so light accents stay legible. */
-function accentForeground(hex: string) {
-  const value = hex.replace("#", "");
-  const channels = [0, 2, 4].map((i) => {
-    const c = parseInt(value.slice(i, i + 2), 16) / 255;
-    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-  });
-  const luminance = 0.2126 * channels[0]! + 0.7152 * channels[1]! + 0.0722 * channels[2]!;
-  return luminance > 0.45 ? "oklch(0.2 0.025 250)" : "oklch(0.99 0 0)";
-}
+
+
+
 
 function ResearchWorkspace() {
   const navigate = useNavigate();
@@ -143,8 +147,8 @@ function ResearchWorkspace() {
   const [engineOpen, setEngineOpen] = useState(false);
   const [engineMode, setEngineMode] = useState<EngineMode>("flash");
   const [theme, setTheme] = useState<Theme>("light");
-  const [accent, setAccent] = useState("#177E76");
-  const [draftAccent, setDraftAccent] = useState("#177E76");
+  const [accent, setAccent] = useState(DEFAULT_ACCENT);
+  const [draftAccent, setDraftAccent] = useState(DEFAULT_ACCENT);
   const [query, setQuery] = useState("");
   const [statusIndex, setStatusIndex] = useState(0);
 
@@ -152,11 +156,12 @@ function ResearchWorkspace() {
     const savedTheme = window.localStorage.getItem("orbis-theme");
     const savedAccent = window.localStorage.getItem("orbis-accent");
     const nextTheme: Theme = savedTheme === "dark" ? "dark" : "light";
-    const nextAccent = savedAccent && /^#[0-9A-Fa-f]{6}$/.test(savedAccent) ? savedAccent : "#177E76";
+    const nextAccent = savedAccent && isHex(savedAccent) ? savedAccent : DEFAULT_ACCENT;
     setTheme(nextTheme);
     setAccent(nextAccent);
     setDraftAccent(nextAccent);
   }, []);
+
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
@@ -244,7 +249,9 @@ function ResearchWorkspace() {
               <NavItem icon={BookMarked} label="Saved papers" open={sidebarOpen} />
               <NavItem icon={FolderKanban} label="Projects" open={sidebarOpen} />
               <NavItem icon={Search} label="Search & discovery" open={sidebarOpen} to="/search" />
-              <NavItem icon={Library} label="Source library" open={sidebarOpen} />
+              <NavItem icon={PenLine} label="Writing workspace" open={sidebarOpen} to="/write" />
+              <NavItem icon={Library} label="Source library" open={sidebarOpen} to="/write" />
+
             </NavGroup>
 
             {sidebarOpen && (
@@ -289,12 +296,23 @@ function ResearchWorkspace() {
             <Button variant="ghost" size="icon" className="rounded-full lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open navigation">
               <Menu />
             </Button>
-            <div className="min-w-0">
-              <h1 className="font-display truncate text-base font-semibold sm:text-lg">Research canvas</h1>
-              <p className="hidden truncate text-xs text-muted-foreground sm:block">Turn questions into evidence</p>
+            <div className="flex min-w-0 items-center gap-6">
+              <div className="min-w-0">
+                <h1 className="font-display truncate text-base font-semibold sm:text-lg">Research canvas</h1>
+                <p className="hidden truncate text-xs text-muted-foreground sm:block">Turn questions into evidence</p>
+              </div>
+              <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
+                <Link to="/search" search={{ q: undefined }} className="rounded-full px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" activeProps={{ className: "bg-accent text-accent-foreground" }}>
+                  Search
+                </Link>
+                <Link to="/write" className="rounded-full px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground" activeProps={{ className: "bg-accent text-accent-foreground" }}>
+                  Writing workspace
+                </Link>
+              </nav>
             </div>
 
-            <div className="relative flex shrink-0 items-center gap-2">
+            <div className="relative ml-auto flex shrink-0 items-center justify-end gap-2">
+
               <div className="relative">
                 <Button
                   variant="outline"
@@ -386,7 +404,31 @@ function ResearchWorkspace() {
                     <Button variant={theme === "light" ? "default" : "outline"} className="rounded-full" onClick={() => setTheme("light")}><Sun /> Light</Button>
                     <Button variant={theme === "dark" ? "default" : "outline"} className="rounded-full" onClick={() => setTheme("dark")}><Moon /> Dark</Button>
                   </div>
+                  <p className="mt-5 text-xs font-medium">Preset accents</p>
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    {accentPresets.map((preset) => (
+                      <button
+                        key={preset.value}
+                        type="button"
+                        onClick={() => {
+                          setAccent(preset.value);
+                          setDraftAccent(preset.value);
+                        }}
+                        aria-pressed={accent.toUpperCase() === preset.value.toUpperCase()}
+                        className={cn(
+                          "flex items-center gap-2 rounded-full border px-3 py-2 text-left text-[11px] font-semibold transition-colors",
+                          accent.toUpperCase() === preset.value.toUpperCase()
+                            ? "border-primary bg-accent text-accent-foreground"
+                            : "border-border hover:bg-muted",
+                        )}
+                      >
+                        <span className="size-4 shrink-0 rounded-full border border-border" style={{ backgroundColor: preset.value }} />
+                        <span className="truncate">{preset.label}</span>
+                      </button>
+                    ))}
+                  </div>
                   <label className="mt-5 block text-xs font-medium" htmlFor="accent">Custom accent</label>
+
                   <div className="mt-2 grid grid-cols-[auto_minmax(0,1fr)_auto] gap-2">
                     <input
                       aria-label="Accent color picker"
@@ -453,15 +495,26 @@ function ResearchWorkspace() {
                     </span>
                   </>
                 );
-                return action.search ? (
-                  <Link key={action.label} to="/search" search={{ q: query.trim() || undefined }} className={cls}>
-                    {inner}
-                  </Link>
-                ) : (
+                if (action.to === "/search") {
+                  return (
+                    <Link key={action.label} to="/search" search={{ q: query.trim() || undefined }} className={cls}>
+                      {inner}
+                    </Link>
+                  );
+                }
+                if (action.to === "/write") {
+                  return (
+                    <Link key={action.label} to="/write" className={cls}>
+                      {inner}
+                    </Link>
+                  );
+                }
+                return (
                   <button key={action.label} type="button" className={cls}>
                     {inner}
                   </button>
                 );
+
               })}
 
               <form className="hub-core relative z-10 flex aspect-square w-[58%] max-w-[23rem] flex-col items-center justify-center rounded-full border border-primary/25 bg-card p-[9%] text-center shadow-2xl" onSubmit={(event) => {
@@ -512,7 +565,7 @@ function NavGroup({ title, open, children }: { title: string; open: boolean; chi
   return <div>{open && <p className="mb-2 px-3 text-[10px] font-semibold uppercase text-muted-foreground">{title}</p>}<div className="space-y-1">{children}</div></div>;
 }
 
-function NavItem({ icon: Icon, label, open, active = false, to }: { icon: typeof History; label: string; open: boolean; active?: boolean; to?: "/search" }) {
+function NavItem({ icon: Icon, label, open, active = false, to }: { icon: typeof History; label: string; open: boolean; active?: boolean; to?: "/search" | "/write" }) {
   const className = cn("flex h-10 w-full items-center rounded-full text-sm transition-colors", open ? "gap-3 px-3" : "justify-center", active ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground" : "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground");
   const inner = (
     <>
@@ -522,7 +575,7 @@ function NavItem({ icon: Icon, label, open, active = false, to }: { icon: typeof
   );
   if (to) {
     return (
-      <Link to={to} search={{ q: undefined }} title={!open ? label : undefined} className={className} activeProps={{ className: "bg-sidebar-accent font-medium text-sidebar-accent-foreground" }}>
+      <Link to={to} title={!open ? label : undefined} className={className} activeProps={{ className: "bg-sidebar-accent font-medium text-sidebar-accent-foreground" }}>
         {inner}
       </Link>
     );

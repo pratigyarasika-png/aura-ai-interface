@@ -4,7 +4,10 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowUpRight,
   BadgeCheck,
+  BookmarkCheck,
+  BookmarkPlus,
   BookOpenText,
+
   ChevronLeft,
   Download,
   ExternalLink,
@@ -12,6 +15,8 @@ import {
   Globe,
   GraduationCap,
   Loader2,
+  PenLine,
+
   Quote,
   Search,
   SlidersHorizontal,
@@ -196,6 +201,13 @@ function SearchDiscovery() {
               Free academic APIs, one query surface
             </p>
           </div>
+          <Button asChild variant="outline" className="ml-auto shrink-0 rounded-full">
+            <Link to="/write">
+              <PenLine />
+              <span className="hidden sm:inline">Writing workspace</span>
+            </Link>
+          </Button>
+
         </div>
       </header>
 
@@ -383,8 +395,34 @@ function SearchDiscovery() {
 
 function PaperCard({ paper }: { paper: Paper }) {
   const [expanded, setExpanded] = useState(false);
+  const [saved, setSaved] = useState(false);
   const abstract = paper.abstract ?? "No abstract provided by this source.";
   const shown = expanded || abstract.length <= 320 ? abstract : `${abstract.slice(0, 320)}…`;
+
+  useEffect(() => {
+    setSaved(loadLibrary().some((item) => item.id === paper.id));
+  }, [paper.id]);
+
+  const toggleSaved = () => {
+    if (saved) {
+      removeFromLibrary(paper.id);
+      setSaved(false);
+      return;
+    }
+    addToLibrary({
+      id: paper.id,
+      title: paper.title,
+      authors: paper.authors,
+      year: paper.year ?? null,
+      venue: paper.venue ?? null,
+      doi: paper.doi ?? null,
+      url: paper.pdfUrl ?? paper.landingUrl ?? null,
+      snippet: paper.abstract ?? null,
+    });
+    setSaved(true);
+  };
+
+
 
   return (
     <article className="rounded-3xl border border-border bg-card p-5 transition-colors hover:border-primary/40">
@@ -424,6 +462,17 @@ function PaperCard({ paper }: { paper: Paper }) {
         <span className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-[11px] font-semibold">
           <Quote className="size-3" /> {paper.citations} citations
         </span>
+        <Button
+          size="sm"
+          variant={saved ? "default" : "outline"}
+          className="rounded-full"
+          onClick={toggleSaved}
+          aria-pressed={saved}
+        >
+          {saved ? <BookmarkCheck /> : <BookmarkPlus />}
+          {saved ? "Saved to library" : "Save to library"}
+        </Button>
+
         {paper.pdfUrl && (
           <Button asChild size="sm" className="rounded-full">
             <a href={paper.pdfUrl} target="_blank" rel="noreferrer">
