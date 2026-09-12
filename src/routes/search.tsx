@@ -383,8 +383,34 @@ function SearchDiscovery() {
 
 function PaperCard({ paper }: { paper: Paper }) {
   const [expanded, setExpanded] = useState(false);
+  const [saved, setSaved] = useState(false);
   const abstract = paper.abstract ?? "No abstract provided by this source.";
   const shown = expanded || abstract.length <= 320 ? abstract : `${abstract.slice(0, 320)}…`;
+
+  useEffect(() => {
+    setSaved(loadLibrary().some((item) => item.id === paper.id));
+  }, [paper.id]);
+
+  const toggleSaved = () => {
+    if (saved) {
+      removeFromLibrary(paper.id);
+      setSaved(false);
+      return;
+    }
+    addToLibrary({
+      id: paper.id,
+      title: paper.title,
+      authors: paper.authors,
+      year: paper.year ?? null,
+      venue: paper.venue ?? null,
+      doi: paper.doi ?? null,
+      url: paper.pdfUrl ?? paper.landingUrl ?? null,
+      snippet: paper.abstract ?? null,
+    });
+    setSaved(true);
+  };
+
+
 
   return (
     <article className="rounded-3xl border border-border bg-card p-5 transition-colors hover:border-primary/40">
